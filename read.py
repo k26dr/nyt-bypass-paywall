@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+# This script requires BeautifulSoup:
+# sudo pip install beautifulsoup4
+
 import sys
+import requests
 
 def get_article_text(url):
-    import requests
     from bs4 import BeautifulSoup
 
     # remove parameters from url
@@ -26,10 +29,22 @@ def help():
     return """
         Usage: python3 read.py \"<url>\"
         Example: python3 read.py \"http://www.nytimes.com/2015/07/22/books/el-doctorow-author-of-historical-fiction-dies-at-84.html\"
+
+        Formatting:
+            - Limit line width: python3 read.py "<url>" | fold -w 80
+            - Word wrap: python3 read.py "<url>" | fold -s
+            - Both: python3 read.py "<url>" | fold -w 80 -s
         """
 
 if __name__ == '__main__':
-    if sys.argv[1] in ['--help', '-h']:
+    try:
+        if sys.argv[1] in ['--help', '-h']:
+            print(help())
+        else:
+            print(get_article_text(sys.argv[1]))
+    except IndexError: # no arguments provided
         print(help())
-    else:
-        print(get_article_text(sys.argv[1]))
+    except requests.exceptions.RequestException as e:
+        print("ERROR: Bad <url> argument") 
+        print(e)
+        print(help())
